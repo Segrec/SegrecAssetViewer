@@ -1,0 +1,9 @@
+# visual studio preferences
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# output and intermediate files
+bin/
+bin-int/
+.vs/
