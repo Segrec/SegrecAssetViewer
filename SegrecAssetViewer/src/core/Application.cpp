@@ -2,6 +2,8 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include "Shader.h"
+
 #include <iostream>
 
 void error_callback(int error, const char* description);
@@ -35,12 +37,43 @@ int main()
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		std::cerr << "Error: Failed to initialize glad" << std::endl;
 
+	// shaders
+	Shader shader("res/shaders/vertex/default.shader", "res/shaders/fragment/default.shader");
+
+	// data
+	float vertices[] = {
+		// positions         // colors
+		-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f,  1.0f, 0.5f, 0.0f,
+		 0.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f
+	};
+
+	// filling buffers with data and sending to shader
+	unsigned int VAO, VBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glBindVertexArray(0);
+
 	// render loop
 	while (!glfwWindowShouldClose(window))
 	{
+		// refreshing buffers
 		glClearColor(0.0f, 0.5f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		// render
+		glUseProgram(shader.GetID());
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		// swap buffers and poll events
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
