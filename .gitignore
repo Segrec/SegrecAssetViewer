@@ -7,3 +7,6 @@
 bin/
 bin-int/
 .vs/
+
+# texture resources
+SegrecAssetViewer/res/textures/

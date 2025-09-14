@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <stb_image.h>
 
 #include "Shader.h"
 #include "ViewerCamera.h"
@@ -17,6 +18,7 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void proccess_input(GLFWwindow* window);
+unsigned int loadTexture(const char* path, bool gammaCorrection);
 
 // settings
 float wWidth = 800.0f, wHeight = 600.0f;
@@ -64,54 +66,20 @@ int main()
 
 	// enabling
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
 	// shaders
 	Shader shader("res/shaders/vertex/default.shader", "res/shaders/fragment/default.shader");
 
 	// data
 	float vertices[] = {
-	// positins           // colors
-	-0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
-
-	-0.5f, -0.5f,  0.5f,  1.0f, 0.5f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.5f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.5f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.5f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.5f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  1.0f, 0.5f, 0.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,
-
-	 0.5f,  0.5f,  0.5f,  0.7f, 1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  0.7f, 1.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f,  0.7f, 1.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f,  0.7f, 1.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  0.7f, 1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  0.7f, 1.0f, 0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.6f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 0.6f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.6f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.6f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.6f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.6f, 1.0f,
-
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,
+		// position          // tex coords
+		-5.0f, -0.5f, -5.0f,  0.0f, 3.0f,
+		-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+		 5.0f, -0.5f,  5.0f,  3.0f, 0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 3.0f,
+		 5.0f, -0.5f,  5.0f,  3.0f, 0.0f,
+		 5.0f, -0.5f, -5.0f,  3.0f, 3.0f
 	};
 
 	// filling buffers with data and sending to shader
@@ -122,10 +90,15 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glBindVertexArray(0);
+
+	// loading a texture
+	unsigned int texture = loadTexture("res/textures/stone_floor.jpg", true);
+
+	shader.SetInt("diffuse", 0);
 
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -219,4 +192,48 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void proccess_input(GLFWwindow* window)
 {
 	
+}
+
+unsigned int loadTexture(const char* path, bool gammaCorrection)
+{
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+
+	int dataFormat = GL_RGB;
+	int internalFormat = GL_RGB;
+	if (nrChannels == 1)
+	{
+		dataFormat = GL_RED;
+	}
+	else if (nrChannels == 3)
+	{
+		dataFormat = GL_RGB;
+	}
+	else if (nrChannels == 4)
+	{
+		dataFormat = GL_RGBA;
+	}
+
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cerr << "Failed to load texture" << std::endl;
+	}
+
+	stbi_image_free(data);
+
+	return texture;
 }
