@@ -82,12 +82,27 @@ unsigned int Shader::GetID() const
 	return m_ID;
 }
 
-void Shader::SetInt(const char* name, int value)
+void Shader::SetInt(const char* name, int value) const
 {
 	glUniform1i(glGetUniformLocation(m_ID, name), value);
 }
 
-void Shader::SetMat4(const char* name, glm::mat4& mat)
+void Shader::SetFloat(const char* name, float value) const
+{
+	glUniform1f(glGetUniformLocation(m_ID, name), value);
+}
+
+void Shader::SetVec3(const char* name, glm::vec3& value) const
+{
+	glUniform3fv(glGetUniformLocation(m_ID, name), 1, &value[0]);
+}
+
+void Shader::SetVec3(const char* name, float x, float y, float z) const
+{
+	glUniform3f(glGetUniformLocation(m_ID, name), x, y, z);
+}
+
+void Shader::SetMat4(const char* name, glm::mat4& mat) const
 {
 	glUniformMatrix4fv(glGetUniformLocation(m_ID, name), 1, GL_FALSE, &mat[0][0]);
 }

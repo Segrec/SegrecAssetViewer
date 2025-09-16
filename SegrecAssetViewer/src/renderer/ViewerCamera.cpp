@@ -74,9 +74,14 @@ glm::mat4 ViewerCamera::GetViewMatrix()
 	return m_ViewMatrix;
 }
 
-float ViewerCamera::GetFOV()
+float ViewerCamera::GetFOV() const
 {
 	return m_FOV;
+}
+
+glm::vec3 ViewerCamera::GetPosition() const
+{
+	return m_Position;
 }
 
 void ViewerCamera::SetFocus(bool isFocused)

@@ -21,16 +21,19 @@ public:
 	void CursorMovement(double xpos, double ypos, GLboolean constrainPitch = true);
 	void ProcessMouseScroll(float yoffset);
 	glm::mat4 GetViewMatrix();
-	float GetFOV();
+	float GetFOV() const;
+	glm::vec3 GetPosition() const;
 	void SetFocus(bool isFocused);
 
 private:
 	void UpdateVectors();
 
+public:
+	glm::vec3 m_Position;
+
 private:
 	glm::mat4 m_ViewMatrix;
 
-	glm::vec3 m_Position;
 	glm::vec3 m_Front;
 	glm::vec3 m_Up;
 	glm::vec3 m_Right;
