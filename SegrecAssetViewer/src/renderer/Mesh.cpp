@@ -12,17 +12,17 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 void Mesh::Draw(Shader& shader)
 {
     //unsigned int diffuseNr = 1;
-    //unsigned int specularNr = 1;
+    //unsigned int roughnessNr = 1;
     //for (unsigned int i = 0; i < textures.size(); i++)
     //{
     //    glActiveTexture(GL_TEXTURE0 + i);
     //
     //    std::string number;
     //    std::string name = textures[i].type;
-    //    if (name == "texture_diffuse")
+    //    if (name == "diffuse")
     //        number = std::to_string(diffuseNr++);
-    //    else if (name == "texture_specular")
-    //        number = std::to_string(specularNr++);
+    //    else if (name == "roughness")
+    //        number = std::to_string(roughnessNr++);
     //
     //    shader.SetInt(("material." + name).c_str(), i);
     //    glBindTexture(GL_TEXTURE_2D, textures[i].id);

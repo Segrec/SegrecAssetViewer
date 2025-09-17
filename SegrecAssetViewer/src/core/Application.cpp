@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
 
 	// shaders
 	Shader shader("res/shaders/vertex/default.shader", "res/shaders/fragment/default.shader");
+	Shader depthShader("res/shaders/vertex/depth.shader", "res/shaders/fragment/depth.shader");
 
 	// data
 	float vertices[] = {
@@ -160,11 +161,47 @@ int main(int argc, char* argv[])
 
 	// loading a texture
 	unsigned int stone_floor_diffuse = loadTexture("res/textures/stone_floor.jpg", true);
-	unsigned int stone_floor_specular = loadTexture("res/textures/stone_floor_specular.jpg");
+	unsigned int stone_floor_roughness = loadTexture("res/textures/stone_floor_roughness.jpg");
 	unsigned int container_diffuse = loadTexture("res/textures/container.png", true);
-	unsigned int container_specular = loadTexture("res/textures/container_specular.png");
+	unsigned int container_roughness = loadTexture("res/textures/container_roughness.png");
 	unsigned int apetrol_diffuse = loadTexture("res/textures/T_ApetrolBarrel_diff_1k.jpg", true);
 	unsigned int apetrol_roughness = loadTexture("res/textures/T_ApetrolBarrel_rough_1k.jpg");
+
+	// shadows
+	// -------
+	const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
+	unsigned int depthMapFBO;
+	glGenFramebuffers(1, &depthMapFBO);
+	// create depth texture
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	// attach depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// shader configuration
+	shader.Use();
+	shader.SetInt("material.diffuse", 0);
+	shader.SetInt("material.roughness", 1);
+	shader.SetInt("shadowMap", 2);
+	shader.SetFloat("material.shininess", 64);
+
+	// light
+	shader.SetVec3("light.direction", 0.5f, -1.0f, -0.5f);
+	shader.SetVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+	shader.SetVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+	shader.SetVec3("light.specular", 0.6f, 0.6f, 0.6f);
 
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -182,20 +219,8 @@ int main(int argc, char* argv[])
 		proccess_input(window);
 
 		// render
-		glUseProgram(shader.GetID());
+		shader.Use();
 
-		// light
-		shader.SetVec3("light.direction", 0.5f, -1.0f, -0.5f);
-		shader.SetVec3("light.ambient", 0.1f, 0.1f, 0.1f);
-		shader.SetVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
-		shader.SetVec3("light.specular", 0.6f, 0.6f, 0.6f);
-
-		// material
-		shader.SetInt("material.diffuse", 0);
-		shader.SetInt("material.specular", 1);
-		shader.SetFloat("material.shininess", 64);
-
-		// other uniforms
 		shader.SetVec3("viewPos", camera.m_Position);
 
 		// matrices
@@ -207,18 +232,66 @@ int main(int argc, char* argv[])
 		shader.SetMat4("view", view);
 		shader.SetMat4("projection", projection);
 
+		// rendering depth to texture
+		// --------------------------
+		depthShader.Use();
+
+		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 25.0f);
+		glm::mat4 lightView = glm::lookAt(glm::vec3(-5.0f, 10.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+		depthShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+		depthShader.SetMat4("model", model);
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		// render scene
+		glBindVertexArray(VAO);
+		model = glm::mat4(1.0f);
+		depthShader.SetMat4("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		glBindVertexArray(cubeVAO);
+		model = glm::translate(model, glm::vec3(1.0f, 0.0f, -2.0f));
+		depthShader.SetMat4("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+		depthShader.SetMat4("model", model);
+		barrel.Draw(shader);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// rendering scene
+		// ---------------
+
+		// reset viewport
+		glViewport(0, 0, wWidth, wHeight);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shader.Use();
+		shader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, stone_floor_diffuse);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, stone_floor_specular);
+		glBindTexture(GL_TEXTURE_2D, stone_floor_roughness);
 		glBindVertexArray(VAO);
+		model = glm::mat4(1.0f);
+		shader.SetMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, container_diffuse);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, container_specular);
+		glBindTexture(GL_TEXTURE_2D, container_roughness);
 		glBindVertexArray(cubeVAO);
+		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(1.0f, 0.0f, -2.0f));
 		shader.SetMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
