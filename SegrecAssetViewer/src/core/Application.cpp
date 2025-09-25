@@ -73,58 +73,13 @@ int main(int argc, char* argv[])
 
 	// data
 	float vertices[] = {
-		// position           // normals         // texture coords
-		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 5.0f,
-		-5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
-		 5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  5.0f, 0.0f,
-		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 5.0f,
-		 5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  5.0f, 0.0f,
-		 5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  5.0f, 5.0f
-	};
-
-	float cubeVertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+		// position           // normals         // texcoords // tangents        // bitangents
+		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		-5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		 5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		 5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		 5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
 	};
 
 	// filling buffers with data and sending to shader
@@ -135,24 +90,15 @@ int main(int argc, char* argv[])
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-	unsigned int cubeVAO, cubeVBO;
-	glGenVertexArrays(1, &cubeVAO);
-	glGenBuffers(1, &cubeVBO);
-	glBindVertexArray(cubeVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float)));
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(11 * sizeof(float)));
 
 	glBindVertexArray(0);
 
@@ -160,12 +106,18 @@ int main(int argc, char* argv[])
 	Model barrel("res/assets/A_ApetrolBarrel_UE.fbx");
 
 	// loading a texture
-	unsigned int stone_floor_diffuse = loadTexture("res/textures/stone_floor.jpg", true);
-	unsigned int stone_floor_roughness = loadTexture("res/textures/stone_floor_roughness.jpg");
-	unsigned int container_diffuse = loadTexture("res/textures/container.png", true);
-	unsigned int container_roughness = loadTexture("res/textures/container_roughness.png");
+	//unsigned int stone_floor_diffuse = loadTexture("res/textures/stone_floor.jpg", true);
+	//unsigned int stone_floor_roughness = loadTexture("res/textures/stone_floor_roughness.jpg");
+	//unsigned int container_diffuse = loadTexture("res/textures/container.png", true);
+	//unsigned int container_roughness = loadTexture("res/textures/container_roughness.png");
 	unsigned int apetrol_diffuse = loadTexture("res/textures/T_ApetrolBarrel_diff_1k.jpg", true);
 	unsigned int apetrol_roughness = loadTexture("res/textures/T_ApetrolBarrel_rough_1k.jpg");
+	unsigned int apetrol_normal = loadTexture("res/textures/T_ApetrolBarrel_normal_gl_1k.jpg");
+	//unsigned int brickwall_diffuse = loadTexture("res/textures/brickwall.jpg", true);
+	//unsigned int brickwall_normal = loadTexture("res/textures/brickwall_normal.jpg");
+	unsigned int debug_diffuse = loadTexture("res/textures/tex_DebugUVTiles.png", true);
+	unsigned int default_roughness = loadTexture("res/textures/T_DefaultRoughness.jpg");
+	unsigned int empty_normal = loadTexture("res/textures/T_EmptyNormal.jpg");
 
 	// shadows
 	// -------
@@ -194,11 +146,13 @@ int main(int argc, char* argv[])
 	shader.Use();
 	shader.SetInt("material.diffuse", 0);
 	shader.SetInt("material.roughness", 1);
-	shader.SetInt("shadowMap", 2);
+	shader.SetInt("material.normal", 2);
+	shader.SetInt("shadowMap", 3);
 	shader.SetFloat("material.shininess", 64);
 
 	// light
 	shader.SetVec3("light.direction", 0.5f, -1.0f, -0.5f);
+	shader.SetVec3("lightDirection", 0.5f, -1.0f, -0.5f);
 	shader.SetVec3("light.ambient", 0.1f, 0.1f, 0.1f);
 	shader.SetVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
 	shader.SetVec3("light.specular", 0.6f, 0.6f, 0.6f);
@@ -251,11 +205,6 @@ int main(int argc, char* argv[])
 		depthShader.SetMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		glBindVertexArray(cubeVAO);
-		model = glm::translate(model, glm::vec3(1.0f, 0.0f, -2.0f));
-		depthShader.SetMat4("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
@@ -274,35 +223,33 @@ int main(int argc, char* argv[])
 		shader.Use();
 		shader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 
+		// default textures
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, stone_floor_diffuse);
+		glBindTexture(GL_TEXTURE_2D, debug_diffuse);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, stone_floor_roughness);
+		glBindTexture(GL_TEXTURE_2D, default_roughness);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, empty_normal);
+
 		glBindVertexArray(VAO);
 		model = glm::mat4(1.0f);
 		shader.SetMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, container_diffuse);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, container_roughness);
-		glBindVertexArray(cubeVAO);
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.0f, 0.0f, -2.0f));
-		shader.SetMat4("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, apetrol_diffuse);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, apetrol_roughness);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, apetrol_normal);
+
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+		//model = glm::rotate(model, glm::radians((float)glfwGetTime() * 10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		shader.SetMat4("model", model);
 		barrel.Draw(shader);
 
