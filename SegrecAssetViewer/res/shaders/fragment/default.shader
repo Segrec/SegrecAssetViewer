@@ -28,8 +28,11 @@ struct Material {
 
 uniform Light light;
 uniform Material material;
-//uniform vec3 viewPos;
 uniform sampler2D shadowMap;
+
+// ImGui
+uniform float lightIntensity;
+uniform float ambientMultiplier;
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 {
@@ -69,7 +72,7 @@ void main()
 	normal = normalize(normal * 2.0 - 1.0);
 
 	// ambient
-	vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;
+	vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb * ambientMultiplier;
 
 	// diffuse
 	//vec3 lightDir = normalize(-light.direction);
@@ -91,7 +94,7 @@ void main()
 	vec3 worldNormal = Normal;
 	float shadow = ShadowCalculation(FragPosLightSpace, worldNormal, worldLightDir);
  
-    vec3 result = (ambient + (1.0 - shadow) * (diffuse + specular));
+    vec3 result = (ambient + (1.0 - shadow) * (diffuse + specular) * lightIntensity);
 
 	result = pow(result, vec3(1.0/2.2));
     FragColor = vec4(result, 1.0);

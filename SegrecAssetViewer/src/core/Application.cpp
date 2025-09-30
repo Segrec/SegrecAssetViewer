@@ -1,10 +1,16 @@
 #include <glad/glad.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #include <stb_image.h>
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 
 #include "Shader.h"
 #include "ViewerCamera.h"
@@ -23,6 +29,8 @@ unsigned int loadTexture(const char* path, bool gammaCorrection = false);
 
 // settings
 float wWidth = 800.0f, wHeight = 600.0f;
+bool rotate_light = false;
+bool imgui_mouse_capture = false;
 
 // camera
 ViewerCamera camera(glm::vec3(0.0f, 0.0f, 5.0f));
@@ -68,18 +76,21 @@ int main(int argc, char* argv[])
 	glEnable(GL_CULL_FACE);
 
 	// shaders
-	Shader shader("res/shaders/vertex/default.shader", "res/shaders/fragment/default.shader");
-	Shader depthShader("res/shaders/vertex/depth.shader", "res/shaders/fragment/depth.shader");
+	//Shader shader("res/shaders/vertex/default.shader", "res/shaders/fragment/default.shader");
+	//Shader depthShader("res/shaders/vertex/depth.shader", "res/shaders/fragment/depth.shader");
+
+	Shader shader("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/shaders/vertex/default.shader", "D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/shaders/fragment/default.shader");
+	Shader depthShader("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/shaders/vertex/depth.shader", "D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/shaders/fragment/depth.shader");
 
 	// data
 	float vertices[] = {
 		// position           // normals         // texcoords // tangents        // bitangents
-		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  5.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
 		-5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
-		 5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
-		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
-		 5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
-		 5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		 5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 5.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  5.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		 5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  0.0f, 5.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+		 5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  5.0f, 5.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
 	};
 
 	// filling buffers with data and sending to shader
@@ -103,21 +114,45 @@ int main(int argc, char* argv[])
 	glBindVertexArray(0);
 
 	// loading assets
-	Model barrel("res/assets/A_ApetrolBarrel_UE.fbx");
+	//Model barrel("res/assets/A_ApetrolBarrel_UE.fbx");
+	Model barrel("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/assets/A_ApetrolBarrel_UE.fbx");
+	Model* current_model = &barrel;
+
+	if (argc > 1)
+	{
+		current_model = new Model(argv[1]);
+		std::cout << "Model loading: " << argv[1] << std::endl;
+	}
 
 	// loading a texture
 	//unsigned int stone_floor_diffuse = loadTexture("res/textures/stone_floor.jpg", true);
 	//unsigned int stone_floor_roughness = loadTexture("res/textures/stone_floor_roughness.jpg");
+	//unsigned int stone_floor_normal = loadTexture("res/textures/stone_floor_normal.jpg");
+	////unsigned int container_diffuse = loadTexture("res/textures/container.png", true);
+	////unsigned int container_roughness = loadTexture("res/textures/container_roughness.png");
+	//unsigned int apetrol_diffuse = loadTexture("res/textures/T_ApetrolBarrel_diff_1k.jpg", true);
+	//unsigned int apetrol_roughness = loadTexture("res/textures/T_ApetrolBarrel_rough_1k.jpg");
+	//unsigned int apetrol_normal = loadTexture("res/textures/T_ApetrolBarrel_normal_gl_1k.jpg");
+	////unsigned int brickwall_diffuse = loadTexture("res/textures/brickwall.jpg", true);
+	////unsigned int brickwall_normal = loadTexture("res/textures/brickwall_normal.jpg");
+	//unsigned int debug_diffuse = loadTexture("res/textures/tex_DebugUVTiles.png", true);
+	//unsigned int default_roughness = loadTexture("res/textures/T_DefaultRoughness.jpg");
+	//unsigned int empty_normal = loadTexture("res/textures/T_EmptyNormal.jpg");
+
+	// delete
+	unsigned int stone_floor_diffuse = loadTexture("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/textures/stone_floor.jpg", true);
+	unsigned int stone_floor_roughness = loadTexture("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/textures/stone_floor_roughness.jpg");
+	unsigned int stone_floor_normal = loadTexture("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/textures/stone_floor_normal.jpg");
 	//unsigned int container_diffuse = loadTexture("res/textures/container.png", true);
 	//unsigned int container_roughness = loadTexture("res/textures/container_roughness.png");
-	unsigned int apetrol_diffuse = loadTexture("res/textures/T_ApetrolBarrel_diff_1k.jpg", true);
-	unsigned int apetrol_roughness = loadTexture("res/textures/T_ApetrolBarrel_rough_1k.jpg");
-	unsigned int apetrol_normal = loadTexture("res/textures/T_ApetrolBarrel_normal_gl_1k.jpg");
+	unsigned int apetrol_diffuse = loadTexture("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/textures/T_ApetrolBarrel_diff_1k.jpg", true);
+	unsigned int apetrol_roughness = loadTexture("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/textures/T_ApetrolBarrel_rough_1k.jpg");
+	unsigned int apetrol_normal = loadTexture("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/textures/T_ApetrolBarrel_normal_gl_1k.jpg");
 	//unsigned int brickwall_diffuse = loadTexture("res/textures/brickwall.jpg", true);
 	//unsigned int brickwall_normal = loadTexture("res/textures/brickwall_normal.jpg");
-	unsigned int debug_diffuse = loadTexture("res/textures/tex_DebugUVTiles.png", true);
-	unsigned int default_roughness = loadTexture("res/textures/T_DefaultRoughness.jpg");
-	unsigned int empty_normal = loadTexture("res/textures/T_EmptyNormal.jpg");
+	unsigned int debug_diffuse = loadTexture("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/textures/tex_DebugUVTiles.png", true);
+	unsigned int default_roughness = loadTexture("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/textures/T_DefaultRoughness.jpg");
+	unsigned int empty_normal = loadTexture("D:/Dev/SegrecAssetViewer/SegrecAssetViewer/res/textures/T_EmptyNormal.jpg");
 
 	// shadows
 	// -------
@@ -151,11 +186,25 @@ int main(int argc, char* argv[])
 	shader.SetFloat("material.shininess", 64);
 
 	// light
-	shader.SetVec3("light.direction", 0.5f, -1.0f, -0.5f);
-	shader.SetVec3("lightDirection", 0.5f, -1.0f, -0.5f);
+	glm::vec3 light_direction = glm::vec3(0.5f, -1.0f, -0.5f);
+	shader.SetVec3("light.direction", light_direction);
+	shader.SetVec3("lightDirection", light_direction);
 	shader.SetVec3("light.ambient", 0.1f, 0.1f, 0.1f);
 	shader.SetVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
 	shader.SetVec3("light.specular", 0.6f, 0.6f, 0.6f);
+
+	// ImGui inizialization
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui::StyleColorsDark();
+    ImGui_ImplOpenGL3_Init((char*)glGetString(330));
+
+	ImGuiIO& io = ImGui::GetIO();
+
+	// ImGui variables
+	float light_intensity = 1.0f;
+	float ambient_multiplier = 1.0f;
 
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -163,6 +212,13 @@ int main(int argc, char* argv[])
 		// refreshing buffers
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// imgui starts new frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		imgui_mouse_capture = io.WantCaptureMouse;
 
 		// per frame logic
 		float currentFrame = static_cast<float>(glfwGetTime());
@@ -191,7 +247,9 @@ int main(int argc, char* argv[])
 		depthShader.Use();
 
 		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 25.0f);
-		glm::mat4 lightView = glm::lookAt(glm::vec3(-5.0f, 10.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::vec3 target = glm::vec3(0.0f);
+		glm::vec3 lightPos = target - light_direction * 10.0f;
+		glm::mat4 lightView = glm::lookAt(lightPos, target, glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 		depthShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
@@ -209,7 +267,7 @@ int main(int argc, char* argv[])
 		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
 		depthShader.SetMat4("model", model);
-		barrel.Draw(shader);
+		current_model->Draw(shader);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -223,14 +281,27 @@ int main(int argc, char* argv[])
 		shader.Use();
 		shader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
+		shader.SetFloat("lightIntensity", light_intensity);
+		shader.SetFloat("ambientMultiplier", ambient_multiplier);
+
+		// light rotation
+		if (rotate_light)
+		{
+			float x = sin(glfwGetTime());
+			float z = cos(glfwGetTime());
+			light_direction.x = x;
+			light_direction.z = z;
+			shader.SetVec3("light.direction", light_direction);
+			shader.SetVec3("lightDirection", light_direction);
+		}
+
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 
-		// default textures
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, debug_diffuse);
+		glBindTexture(GL_TEXTURE_2D, stone_floor_diffuse);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, default_roughness);
+		glBindTexture(GL_TEXTURE_2D, stone_floor_roughness);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, empty_normal);
 
@@ -240,23 +311,45 @@ int main(int argc, char* argv[])
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, apetrol_diffuse);
+		glBindTexture(GL_TEXTURE_2D, debug_diffuse);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, apetrol_roughness);
+		glBindTexture(GL_TEXTURE_2D, default_roughness);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, apetrol_normal);
+		glBindTexture(GL_TEXTURE_2D, empty_normal);
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
-		//model = glm::rotate(model, glm::radians((float)glfwGetTime() * 10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		shader.SetMat4("model", model);
-		barrel.Draw(shader);
+		current_model->Draw(shader);
+
+		// ImGui Window - Test
+		{
+			float windowWidth = 425.0f;  // šíøka panelu
+			float windowHeight = io.DisplaySize.y;  // výška = výška okna
+
+			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - windowWidth, 0), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight), ImGuiCond_Always);
+			ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+			ImGui::TextWrapped("Let this petite program help you with viewing assets fast and easy - Segrec Development Team");
+
+			ImGui::SliderFloat("Light Intensity", &light_intensity, 0.0f, 2.0f, "%.2f");
+			ImGui::SliderFloat("Ambient Multiplier", &ambient_multiplier, 0.0f, 2.0f, "%.2f");
+
+			ImGui::End();
+		}
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// swap buffers and poll events
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glfwDestroyWindow(window);
 
@@ -291,6 +384,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		glEnable(GL_MULTISAMPLE);
 	if (key == GLFW_KEY_4 && action == GLFW_PRESS)
 		glDisable(GL_MULTISAMPLE);
+
+	// light rotation
+	if (key == GLFW_KEY_5 && action == GLFW_PRESS)
+		rotate_light = true;
+	if (key == GLFW_KEY_6 && action == GLFW_PRESS)
+		rotate_light = false;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -312,16 +411,19 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	if (!imgui_mouse_capture)
 	{
-		camera.SetFocus(true);
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	}
-	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-	{
-		camera.SetFocus(false);
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		glfwSetCursorPos(window, wWidth / 2.0, wHeight / 2.0);
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+		{
+			camera.SetFocus(true);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+		{
+			camera.SetFocus(false);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			glfwSetCursorPos(window, wWidth / 2.0, wHeight / 2.0);
+		}
 	}
 }
 
