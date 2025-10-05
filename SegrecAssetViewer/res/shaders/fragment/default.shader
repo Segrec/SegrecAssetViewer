@@ -32,7 +32,9 @@ uniform sampler2D shadowMap;
 
 // ImGui
 uniform float lightIntensity;
-uniform float ambientMultiplier;
+uniform float ambientIntensity;
+uniform float specularIntensity;
+uniform int renderShadows;
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 {
@@ -72,29 +74,26 @@ void main()
 	normal = normalize(normal * 2.0 - 1.0);
 
 	// ambient
-	vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb * ambientMultiplier;
+	vec3 ambient = light.ambient * ambientIntensity * texture(material.diffuse, TexCoords).rgb;
 
 	// diffuse
-	//vec3 lightDir = normalize(-light.direction);
 	vec3 lightDir = TangentLightDir;
 	float diff = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;
+	vec3 diffuse = light.diffuse * lightIntensity * diff * texture(material.diffuse, TexCoords).rgb;
 
 	// specular
 	vec3 viewDir = normalize(TangentViewPos - TangentFragPos);
-	//vec3 reflectDir = reflect(-lightDir, norm);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
 	vec3 specularMap = vec3(1.0) - texture(material.roughness, TexCoords).rgb;
-	//vec3 specular = light.specular * spec * specularMap;
-	vec3 specular = light.specular * spec * vec3(0.2);
+	vec3 specular = light.specular * specularIntensity * spec * specularMap;
 
 	// shadows
 	vec3 worldLightDir = normalize(-light.direction);
 	vec3 worldNormal = Normal;
-	float shadow = ShadowCalculation(FragPosLightSpace, worldNormal, worldLightDir);
+	float shadow = renderShadows == 1 ? ShadowCalculation(FragPosLightSpace, worldNormal, worldLightDir) : 0.0;
  
-    vec3 result = (ambient + (1.0 - shadow) * (diffuse + specular) * lightIntensity);
+    vec3 result = (ambient + (1.0 - shadow) * (diffuse + specular));
 
 	result = pow(result, vec3(1.0/2.2));
     FragColor = vec4(result, 1.0);
